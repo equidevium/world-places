@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
+import { Navigation } from "@/components/layout/navigation";
 
 export function Header() {
   return (
-    <header className="border-b border-bg1 bg-bg/80 backdrop-blur-sm">
+    <header className="relative border-b border-bg1 bg-bg/80 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="font-mono text-xl font-bold text-yellow-light">
+        <Link
+          href="/"
+          className="font-mono text-xl font-bold text-yellow-light"
+        >
           {SITE_NAME}
         </Link>
 
@@ -20,6 +24,8 @@ export function Header() {
             </Link>
           ))}
         </nav>
+
+        {/* <Navigation /> */}
       </div>
     </header>
   );
