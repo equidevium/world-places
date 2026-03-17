@@ -1,27 +1,29 @@
 "use client";
 
-import { useEffect } from "react";
-import { ArcRotateCamera, Vector3, HemisphericLight } from "@babylonjs/core";
+import { useCallback } from "react";
+import { ArcRotateCamera, HemisphericLight, Vector3 } from "@babylonjs/core";
+import type { Engine, Scene } from "@babylonjs/core";
 import { useBabylonEngine } from "@/hooks/use-babylon-engine";
+import { createRealisticEarth } from "@/components/earth/earth-realistic";
+import { registerEarthRotation } from "@/hooks/use-earth-rotation";
 
 export function EarthScene() {
-  const { canvasRef, scene, isReady } = useBabylonEngine();
-
-  useEffect(() => {
-    if (!scene || !isReady) return;
+  const setupScene = useCallback((engine: Engine, scene: Scene) => {
+    const canvas = engine.getRenderingCanvas();
 
     const camera = new ArcRotateCamera(
       "mainCamera",
       Math.PI / 2,
       Math.PI / 2.5,
-      4,
+      3.5,
       Vector3.Zero(),
       scene,
     );
-    camera.lowerRadiusLimit = 2.5;
-    camera.upperRadiusLimit = 10;
+    camera.lowerRadiusLimit = 2;
+    camera.upperRadiusLimit = 8;
     camera.wheelDeltaPercentage = 0.01;
-    camera.attachControl(scene.getEngine().getRenderingCanvas(), true);
+    camera.panningSensibility = 0;
+    camera.attachControl(canvas, true);
 
     const ambientLight = new HemisphericLight(
       "ambientLight",
@@ -30,11 +32,22 @@ export function EarthScene() {
     );
     ambientLight.intensity = 0.4;
 
+    const earth = createRealisticEarth(scene);
+
+    const stopRotation = registerEarthRotation(scene, [
+      { mesh: earth.earthMesh, speed: 0.05 },
+      { mesh: earth.cloudMesh, speed: 0.03 },
+    ]);
+
     return () => {
+      stopRotation();
+      earth.dispose();
       camera.dispose();
       ambientLight.dispose();
     };
-  }, [scene, isReady]);
+  }, []);
+
+  const { canvasRef, isReady } = useBabylonEngine(setupScene);
 
   return (
     <div className="relative h-full w-full">

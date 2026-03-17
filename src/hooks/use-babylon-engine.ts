@@ -1,6 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+// Hook for bootstrapping BabylonJS engine onto a <canvas> element.
+//
+// Uses a React 19 ref callback instead of useEffect — the engine gets
+// created the moment the canvas mounts into the DOM, and torn down when
+// the returned cleanup function fires on unmount. No timing races, no
+// stale refs, no double-init in Strict Mode.
+//
+// Usage:
+//   const { canvasRef, isReady } = useBabylonEngine((engine, scene) => {
+//     // set up cameras, lights, meshes here
+//     // return a cleanup fn if you need to dispose anything you created
+//   });
+//
+//   <canvas ref={canvasRef} />
+
+import { useState } from "react";
 import { Engine, Scene } from "@babylonjs/core";
 import type { SceneConfig } from "@/types/earth";
 
@@ -13,67 +28,64 @@ const DEFAULT_CONFIG: SceneConfig = {
   adaptToDeviceRatio: true,
 };
 
+type CleanupFn = () => void;
+type OnSceneReady = (engine: Engine, scene: Scene) => CleanupFn | undefined;
+
 interface UseBabylonEngineReturn {
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  engine: Engine | null;
-  scene: Scene | null;
+  canvasRef: (node: HTMLCanvasElement | null) => (() => void) | undefined;
   isReady: boolean;
 }
 
 export function useBabylonEngine(
+  onSceneReady: OnSceneReady,
   config: Partial<SceneConfig> = {},
 ): UseBabylonEngineReturn {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const engineRef = useRef<Engine | null>(null);
-  const sceneRef = useRef<Scene | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const mergedConfig = { ...DEFAULT_CONFIG, ...config };
+  const { antialias, engineOptions, adaptToDeviceRatio } = {
+    ...DEFAULT_CONFIG,
+    ...config,
+  };
 
-  const handleResize = useCallback(() => {
-    engineRef.current?.resize();
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  function canvasRef(canvas: HTMLCanvasElement | null) {
+    if (!canvas) {
+      setIsReady(false);
+      return;
+    }
 
     const engine = new Engine(
       canvas,
-      mergedConfig.antialias,
-      mergedConfig.engineOptions,
-      mergedConfig.adaptToDeviceRatio,
+      antialias,
+      engineOptions,
+      adaptToDeviceRatio,
     );
 
     const scene = new Scene(engine);
     scene.clearColor.set(0.114, 0.125, 0.129, 1);
 
-    engineRef.current = engine;
-    sceneRef.current = scene;
-    setIsReady(true);
+    const sceneCleanup = onSceneReady(engine, scene);
 
     engine.runRenderLoop(() => {
       scene.render();
     });
 
+    setIsReady(true);
+
+    function handleResize() {
+      engine.resize();
+    }
+
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      sceneCleanup?.();
       engine.stopRenderLoop();
       scene.dispose();
       engine.dispose();
-      engineRef.current = null;
-      sceneRef.current = null;
       setIsReady(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }
 
-  return {
-    canvasRef,
-    engine: engineRef.current,
-    scene: sceneRef.current,
-    isReady,
-  };
+  return { canvasRef, isReady };
 }
