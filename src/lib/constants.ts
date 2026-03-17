@@ -1,4 +1,4 @@
-import type { NavLink, SocialLink } from "@/types/components";
+import type { NavLink, SocialLink, BadgeVariant } from "@/types/components";
 
 export const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Home" },
@@ -16,3 +16,11 @@ export const SOCIAL_LINKS: SocialLink[] = [
 ];
 
 export const SITE_NAME = "World Places";
+
+export const CATEGORY_VARIANTS: Record<string, BadgeVariant> = {
+  "natural-wonder": "success",
+  historical: "warning",
+  cultural: "info",
+  urban: "default",
+  remote: "error",
+};

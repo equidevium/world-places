@@ -1,19 +1,11 @@
 import type { Place } from "@/types/places";
-import type { BadgeVariant } from "@/types/components";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CATEGORY_VARIANTS } from "@/lib/constants";
 
 interface PlaceCardProps {
   place: Place;
 }
-
-const CATEGORY_VARIANTS: Record<string, BadgeVariant> = {
-  "natural-wonder": "success",
-  historical: "warning",
-  cultural: "info",
-  urban: "default",
-  remote: "error",
-};
 
 export function PlaceCard({ place }: PlaceCardProps) {
   return (
