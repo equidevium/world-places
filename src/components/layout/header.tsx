@@ -25,7 +25,7 @@ export function Header() {
           ))}
         </nav>
 
-        {/* <Navigation /> */}
+        <Navigation />
       </div>
     </header>
   );
