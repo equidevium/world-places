@@ -11,6 +11,9 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@babylonjs/core": "^8.55.3",
+    "@babylonjs/loaders": "^8.55.3",
+    "@babylonjs/materials": "^8.55.3",
     "next": "^16.1.7",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"

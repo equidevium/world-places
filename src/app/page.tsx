@@ -1,9 +1,13 @@
+import { EarthSceneLoader } from "@/components/earth/earth-scene-loader";
+
 export default function HomePage() {
   return (
-    <section className="flex flex-1 items-center justify-center">
-      <h1 className="font-mono text-4xl font-bold text-yellow-light">
-        World Places
-      </h1>
+    <section className="flex flex-1 flex-col">
+      <div className="flex flex-1 items-center justify-center">
+        <div className="h-[600px] w-full max-w-4xl">
+          <EarthSceneLoader />
+        </div>
+      </div>
     </section>
   );
 }
