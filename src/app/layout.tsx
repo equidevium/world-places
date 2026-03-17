@@ -1,9 +1,49 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-jetbrains",
+});
+
 export const metadata: Metadata = {
-  title: "World Places",
-  description: "Explore remarkable places across the globe",
+  title: {
+    default: "World Places",
+    template: "%s | World Places",
+  },
+  description:
+    "An interactive 3D globe showcasing interesting places across the world. Built with Next.js, React, and BabylonJS.",
+  keywords: [
+    "globe",
+    "3D",
+    "world",
+    "places",
+    "travel",
+    "BabylonJS",
+    "interactive map",
+  ],
+  authors: [{ name: "Theodoros Doukoulos" }],
+  openGraph: {
+    title: "World Places",
+    description:
+      "An interactive 3D globe showcasing interesting places across the world.",
+    type: "website",
+    locale: "en_US",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1d2021",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -12,8 +52,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }

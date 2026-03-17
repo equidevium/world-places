@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @theme {
+  /* Fonts */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
   /* Backgrounds */
   --color-bg-hard: #1d2021;
   --color-bg: #282828;
