@@ -1,10 +1,11 @@
-import type { Mesh, Scene } from "@babylonjs/core";
+import type { TransformNode, Scene } from "@babylonjs/core";
 
-// Spins meshes around the Y axis at different rates.
-// Returns a dispose function that unregisters the observer.
+// Spins nodes around the Y axis at different rates.
+// Accepts any TransformNode (meshes, pivots, etc.) since all we
+// touch is the rotation vector.
 
 interface RotationTarget {
-  mesh: Mesh;
+  mesh: TransformNode;
   speed: number;
 }
 

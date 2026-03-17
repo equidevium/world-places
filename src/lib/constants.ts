@@ -1,5 +1,3 @@
-// this is needed since both header and footer will have to reference nav links.
-
 import type { NavLink, SocialLink } from "@/types/components";
 
 export const NAV_LINKS: NavLink[] = [

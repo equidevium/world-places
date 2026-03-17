@@ -1,21 +1,35 @@
 // Main scene wrapper — owns the BabylonJS engine, camera, lights, and
-// delegates earth creation to whichever mode is active. When the user
-// toggles modes, the current earth is disposed and the new one built
-// in its place. A short CSS opacity fade covers the swap so the canvas
-// doesn't flash.
+// delegates earth creation to whichever mode is active. Markers are
+// created once and persist across mode toggles since they represent
+// the same data regardless of render style.
 
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { ArcRotateCamera, HemisphericLight, Vector3 } from "@babylonjs/core";
+import {
+  ArcRotateCamera,
+  HemisphericLight,
+  TransformNode,
+  Vector3,
+} from "@babylonjs/core";
 import type { Engine, Scene } from "@babylonjs/core";
 
 import { useBabylonEngine } from "@/hooks/use-babylon-engine";
 import { registerEarthRotation } from "@/hooks/use-earth-rotation";
 import { createRealisticEarth } from "@/components/earth/earth-realistic";
 import { createStylizedEarth } from "@/components/earth/earth-stylized";
+import { createMarkers } from "@/components/earth/earth-markers";
 import { RenderToggle } from "@/components/earth/render-toggle";
-import type { RenderMode } from "@/types/earth";
+import { PLACES } from "@/lib/places-data";
+import type { RenderMode, MarkerData } from "@/types/earth";
+
+// Convert places data into the format the marker system expects
+const MARKER_DATA: MarkerData[] = PLACES.map((place) => ({
+  id: place.slug,
+  label: place.name,
+  coordinates: place.coordinates,
+  category: place.category,
+}));
 
 interface EarthHandle {
   dispose: () => void;
@@ -24,20 +38,25 @@ interface EarthHandle {
 function buildEarth(
   scene: Scene,
   renderMode: RenderMode,
+  pivot: TransformNode,
 ): { handle: EarthHandle; stopRotation: () => void } {
   if (renderMode === "realistic") {
     const earth = createRealisticEarth(scene);
+    earth.earthMesh.parent = pivot;
+    earth.cloudMesh.parent = pivot;
+
     const stopRotation = registerEarthRotation(scene, [
-      { mesh: earth.earthMesh, speed: 0.05 },
-      { mesh: earth.cloudMesh, speed: 0.03 },
+      { mesh: pivot, speed: 0.05 },
     ]);
     return { handle: earth, stopRotation };
   }
 
   const earth = createStylizedEarth(scene);
+  earth.earthMesh.parent = pivot;
+  earth.wireframeMesh.parent = pivot;
+
   const stopRotation = registerEarthRotation(scene, [
-    { mesh: earth.earthMesh, speed: 0.04 },
-    { mesh: earth.wireframeMesh, speed: 0.04 },
+    { mesh: pivot, speed: 0.04 },
   ]);
   return { handle: earth, stopRotation };
 }
@@ -49,6 +68,7 @@ export function EarthScene() {
   const earthRef = useRef<EarthHandle | null>(null);
   const rotationCleanupRef = useRef<(() => void) | null>(null);
   const modeRef = useRef<RenderMode>("realistic");
+  const pivotRef = useRef<TransformNode | null>(null);
 
   function teardownEarth() {
     rotationCleanupRef.current?.();
@@ -59,10 +79,11 @@ export function EarthScene() {
 
   function swapEarth(nextMode: RenderMode) {
     const scene = sceneRef.current;
-    if (!scene) return;
+    const pivot = pivotRef.current;
+    if (!scene || !pivot) return;
 
     teardownEarth();
-    const { handle, stopRotation } = buildEarth(scene, nextMode);
+    const { handle, stopRotation } = buildEarth(scene, nextMode, pivot);
     earthRef.current = handle;
     rotationCleanupRef.current = stopRotation;
     modeRef.current = nextMode;
@@ -87,7 +108,7 @@ export function EarthScene() {
       Vector3.Zero(),
       scene,
     );
-    camera.lowerRadiusLimit = 2;
+    camera.lowerRadiusLimit = 2.5;
     camera.upperRadiusLimit = 8;
     camera.wheelDeltaPercentage = 0.01;
     camera.panningSensibility = 0;
@@ -100,16 +121,31 @@ export function EarthScene() {
     );
     ambientLight.intensity = 0.4;
 
-    const { handle, stopRotation } = buildEarth(scene, "realistic");
+    // Shared pivot node — earth meshes and markers are children of this
+    // so they all rotate together. When we swap render modes, only the
+    // earth meshes are disposed; the pivot and markers survive.
+    const pivot = new TransformNode("earthPivot", scene);
+    pivotRef.current = pivot;
+
+    // Markers are mode-independent — same dots on both earths
+    const markers = createMarkers(scene, MARKER_DATA);
+    for (const mesh of markers.meshes) {
+      mesh.parent = pivot;
+    }
+
+    const { handle, stopRotation } = buildEarth(scene, "realistic", pivot);
     earthRef.current = handle;
     rotationCleanupRef.current = stopRotation;
     modeRef.current = "realistic";
 
     return () => {
       teardownEarth();
+      markers.dispose();
+      pivot.dispose();
       camera.dispose();
       ambientLight.dispose();
       sceneRef.current = null;
+      pivotRef.current = null;
     };
   }, []);
 

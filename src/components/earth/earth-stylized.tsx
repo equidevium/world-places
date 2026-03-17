@@ -15,10 +15,8 @@ const SEGMENTS = 48;
 
 const GRUVBOX = {
   aqua: Color3.FromHexString("#689d6a"),
-  aquaLight: Color3.FromHexString("#8ec07c"),
   bgSoft: Color3.FromHexString("#32302f"),
   bg1: Color3.FromHexString("#3c3836"),
-  blue: Color3.FromHexString("#458588"),
 } as const;
 
 interface StylizedEarthHandle {
@@ -27,8 +25,6 @@ interface StylizedEarthHandle {
   dispose: () => void;
 }
 
-// Only a stylized earth with a solid color and wireframe overlay, no textures or lighting
-//
 export function createStylizedEarth(scene: Scene): StylizedEarthHandle {
   // -- Solid base sphere --
   const earthMesh = MeshBuilder.CreateSphere(
@@ -59,16 +55,11 @@ export function createStylizedEarth(scene: Scene): StylizedEarthHandle {
   wireMaterial.backFaceCulling = false;
   wireframeMesh.material = wireMaterial;
 
-  const ambientTint = new StandardMaterial("stylizedAmbient", scene);
-  // ambientTint.emissiveColor = new Color3(0.08, 0.12, 0.1);
-  // ambientTint.alpha = 0.15;
-
   function dispose() {
     wireframeMesh.dispose();
     wireMaterial.dispose();
     earthMesh.dispose();
     baseMaterial.dispose();
-    ambientTint.dispose();
   }
 
   return { earthMesh, wireframeMesh, dispose };

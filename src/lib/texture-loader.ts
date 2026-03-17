@@ -1,10 +1,7 @@
-// Paths to the textures we use for the Earth. We export them as constants here so they can be easily imported and used across the app, and so we have a single source of truth for the texture paths.
-//
-// All images sit in /public/textures and get served as static assets by
-// Next.js. The filenames here must match what's actually on disk
-//
-// TODO: The specular map is kept around even though the current material doesn't
-// apply it ( killed the shininess due to wrong setup values ).
+// NASA Blue Marble texture set for the realistic earth.
+// Filenames must match what's on disk in /public/textures.
+// Specular map kept around even though we killed the shininess — handy
+// if ocean glint ever comes back.
 
 import type { EarthTextures } from "@/types/earth";
 

@@ -1,6 +1,3 @@
-// Toggle button for switching between realistic and stylized earth modes.
-// Sits as an overlay on top of the canvas, bottom-right corner.
-
 "use client";
 
 import type { RenderMode } from "@/types/earth";
