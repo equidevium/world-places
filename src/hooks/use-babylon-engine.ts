@@ -7,6 +7,9 @@
 // the returned cleanup function fires on unmount. No timing races, no
 // stale refs, no double-init in Strict Mode.
 //
+// The ref callback is stored behind useRef so React doesn't see a new
+// function on every render and re-mount the canvas.
+//
 // Usage:
 //   const { canvasRef, isReady } = useBabylonEngine((engine, scene) => {
 //     // set up cameras, lights, meshes here
@@ -15,7 +18,7 @@
 //
 //   <canvas ref={canvasRef} />
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Engine, Scene } from "@babylonjs/core";
 import type { SceneConfig } from "@/types/earth";
 
@@ -47,45 +50,64 @@ export function useBabylonEngine(
     ...config,
   };
 
-  function canvasRef(canvas: HTMLCanvasElement | null) {
-    if (!canvas) {
-      setIsReady(false);
-      return;
-    }
+  // Keep the cleanup function from the previous mount so we can call it
+  // if the canvas unmounts (React passes null to the ref callback).
+  const cleanupRef = useRef<CleanupFn | null>(null);
 
-    const engine = new Engine(
-      canvas,
-      antialias,
-      engineOptions,
-      adaptToDeviceRatio,
-    );
+  // Stable ref callback — stored in a ref so React doesn't see a new
+  // function identity on re-renders, which would cause it to unmount
+  // and remount the canvas (destroying the entire WebGL context).
+  const callbackRef = useRef<
+    (node: HTMLCanvasElement | null) => (() => void) | undefined
+  >(null);
 
-    const scene = new Scene(engine);
-    scene.clearColor.set(0.114, 0.125, 0.129, 1);
+  if (!callbackRef.current) {
+    callbackRef.current = (canvas: HTMLCanvasElement | null) => {
+      // Cleanup path — canvas unmounted
+      if (!canvas) {
+        cleanupRef.current?.();
+        cleanupRef.current = null;
+        setIsReady(false);
+        return;
+      }
 
-    const sceneCleanup = onSceneReady(engine, scene);
+      const engine = new Engine(
+        canvas,
+        antialias,
+        engineOptions,
+        adaptToDeviceRatio,
+      );
 
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
+      const scene = new Scene(engine);
+      scene.clearColor.set(0.114, 0.125, 0.129, 1);
 
-    setIsReady(true);
+      const sceneCleanup = onSceneReady(engine, scene);
 
-    function handleResize() {
-      engine.resize();
-    }
+      engine.runRenderLoop(() => {
+        scene.render();
+      });
 
-    window.addEventListener("resize", handleResize);
+      setIsReady(true);
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      sceneCleanup?.();
-      engine.stopRenderLoop();
-      scene.dispose();
-      engine.dispose();
-      setIsReady(false);
+      function handleResize() {
+        engine.resize();
+      }
+
+      window.addEventListener("resize", handleResize);
+
+      const cleanup = () => {
+        window.removeEventListener("resize", handleResize);
+        sceneCleanup?.();
+        engine.stopRenderLoop();
+        scene.dispose();
+        engine.dispose();
+        setIsReady(false);
+      };
+
+      cleanupRef.current = cleanup;
+      return cleanup;
     };
   }
 
-  return { canvasRef, isReady };
+  return { canvasRef: callbackRef.current, isReady };
 }
