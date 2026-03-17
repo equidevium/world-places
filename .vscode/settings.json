@@ -2,5 +2,10 @@
   "css.validate": false,
   "scss.validate": false,
   "less.validate": false,
-  "tailwindCSS.experimental.configFile": "src/app/globals.css"
+  "tailwindCSS.experimental.configFile": "src/app/globals.css",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
 }
