@@ -1,6 +1,6 @@
 // NASA Blue Marble texture set for the realistic earth.
 // Filenames must match what's on disk in /public/textures.
-// Specular map kept around even though we killed the shininess — handy
+// Specular map kept around even though we killed the shininess; handy
 // if ocean glint ever comes back.
 
 import type { EarthTextures } from "@/types/earth";

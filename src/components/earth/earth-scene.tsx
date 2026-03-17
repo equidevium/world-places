@@ -1,4 +1,4 @@
-// Main scene wrapper — owns the BabylonJS engine, camera, lights, and
+// Main scene wrapper: owns the BabylonJS engine, camera, lights, and
 // delegates earth creation to whichever mode is active. Markers are
 // created once and persist across mode toggles since they represent
 // the same data regardless of render style.
@@ -121,13 +121,13 @@ export function EarthScene() {
     );
     ambientLight.intensity = 0.4;
 
-    // Shared pivot node — earth meshes and markers are children of this
+    // Shared pivot node: earth meshes and markers are children of this
     // so they all rotate together. When we swap render modes, only the
     // earth meshes are disposed; the pivot and markers survive.
     const pivot = new TransformNode("earthPivot", scene);
     pivotRef.current = pivot;
 
-    // Markers are mode-independent — same dots on both earths
+    // Markers are mode-independent: same dots on both earths
     const markers = createMarkers(scene, MARKER_DATA);
     for (const mesh of markers.meshes) {
       mesh.parent = pivot;

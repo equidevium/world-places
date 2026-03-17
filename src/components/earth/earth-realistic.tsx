@@ -1,4 +1,4 @@
-// Realistic earth renderer — textured globe with day map, bump mapping
+// Realistic earth renderer: textured globe with day map, bump mapping
 // for terrain relief, specular highlights on oceans, a cloud layer,
 // and a GlowLayer for the atmospheric rim effect.
 

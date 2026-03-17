@@ -1,4 +1,4 @@
-// Stylized earth renderer — flat Gruvbox-colored globe with a wireframe
+// Stylized earth renderer: flat Gruvbox-colored globe with a wireframe
 // overlay for a clean, data-visualization aesthetic. No photorealistic
 // textures here; the look is intentionally minimal and technical.
 //

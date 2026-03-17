@@ -18,7 +18,7 @@ import type { MarkerData } from "@/types/earth";
 const MARKER_ALTITUDE = 1.02;
 const MARKER_DIAMETER = 0.04;
 
-// Gruvbox orange-light for marker dots — high contrast against both
+// Gruvbox orange-light for marker dots: high contrast against both
 // the blue realistic earth and the aqua stylized one.
 const MARKER_COLOR = Color3.FromHexString("#fe8019");
 
@@ -33,12 +33,12 @@ interface MarkersHandle {
 // That puts the prime meridian (lng=0°) along +Z, north pole at +Y, 90°E at +X.
 //
 // Two corrections to match our texture mapping on the BabylonJS sphere:
-//   1) lng + 90°  — BabylonJS sphere UV starts 90° west of the prime meridian,
+//   1) lng + 90°  : BabylonJS sphere UV starts 90° west of the prime meridian,
 //                    so raw lng=0 lands in the mid-Atlantic. The offset fixes it.
-//   2) negate X   — our textures use uScale=-1 (horizontal flip) which mirrors
+//   2) negate X   : our textures use uScale=-1 (horizontal flip) which mirrors
 //                    east/west. Negating X cancels that so markers stay correct.
 //
-// Y is untouched — vScale=-1 corrects north/south on the texture but doesn't
+// Y is untouched: vScale=-1 corrects north/south on the texture but doesn't
 // affect where "37.98°N" sits in 3D space. Net result: Athens lands on Greece.
 function latLngToVector3(lat: number, lng: number, radius: number): Vector3 {
   const latRad = lat * (Math.PI / 180);

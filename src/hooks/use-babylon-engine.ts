@@ -2,7 +2,7 @@
 
 // Hook for bootstrapping BabylonJS engine onto a <canvas> element.
 //
-// Uses a React 19 ref callback instead of useEffect — the engine gets
+// Uses a React 19 ref callback instead of useEffect. The engine gets
 // created the moment the canvas mounts into the DOM, and torn down when
 // the returned cleanup function fires on unmount. No timing races, no
 // stale refs, no double-init in Strict Mode.
@@ -54,7 +54,7 @@ export function useBabylonEngine(
   // if the canvas unmounts (React passes null to the ref callback).
   const cleanupRef = useRef<CleanupFn | null>(null);
 
-  // Stable ref callback — stored in a ref so React doesn't see a new
+  // Stable ref callback: stored in a ref so React doesn't see a new
   // function identity on re-renders, which would cause it to unmount
   // and remount the canvas (destroying the entire WebGL context).
   const callbackRef = useRef<
@@ -63,7 +63,7 @@ export function useBabylonEngine(
 
   if (!callbackRef.current) {
     callbackRef.current = (canvas: HTMLCanvasElement | null) => {
-      // Cleanup path — canvas unmounted
+      // Cleanup path: canvas unmounted
       if (!canvas) {
         cleanupRef.current?.();
         cleanupRef.current = null;

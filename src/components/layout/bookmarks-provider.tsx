@@ -38,7 +38,7 @@ function writeToStorage(slugs: string[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(slugs));
   } catch {
-    // Storage full or blocked — silently ignore
+    // Storage full or blocked: silently ignore
     // TODO : actually define what should happen here since we would like to also give some sort of limits to the user and inform them about it.
   }
 }
@@ -50,7 +50,7 @@ interface BookmarksProviderProps {
 export function BookmarksProvider({ children }: BookmarksProviderProps) {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
 
-  // Read once on mount — not in useState initializer because
+  // Read once on mount. Not in useState initializer because
   // localStorage isn't available during SSR and the initial
   // server render must match the client's first draw.
   useEffect(() => {
